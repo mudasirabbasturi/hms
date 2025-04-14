@@ -8,6 +8,7 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Models\Procedure;
 use App\Models\Share;
+use App\Models\Department;
 use Inertia\Inertia;
 
 class AppointmentController extends Controller
@@ -26,10 +27,12 @@ class AppointmentController extends Controller
         ->orderBy('appointments.id', 'desc')->cursor();
         $doctors = User::select('id', 'name')->where('type', 'doctor')->cursor();
         $patients = Patient::cursor();
+        $departments = Department::cursor();
         return inertia('Components/Opd/Token/Index', [
             'tokens' => $tokens,
             'doctors' => $doctors,
             'patients' => $patients,
+            'departments' => $departments
         ]);
     }
 

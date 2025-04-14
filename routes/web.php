@@ -27,12 +27,13 @@ Route::put('/user/{id}', [UserController::class, 'updateSingleColumn'])->name('u
 Route::put('/user/update/profile/{id}', [UserController::class, 'updateProfile'])->name('user.update.profile');
 Route::delete('/user/{id}', [UserController::class, 'Destroy'])->name('user.destroy');
 
-// Departmens
+/** Departments Route Start */
 Route::get('/departments', [DepartmentController::class, 'Index'])->name('department.index');
 Route::post('/department/store', [DepartmentController::class, 'Store'])->name('department.store');
 Route::get('/department/{id}', [DepartmentController::class, 'Edit'])->name('department.edit');
 Route::put('/department/{id}', [DepartmentController::class, 'Update'])->name('department.update');
 Route::delete('/department/{id}', [DepartmentController::class, 'Destroy'])->name('department.destroy');
+/** Departments Route End */
 
 // Patients
 Route::get('/patients', [PatientController::class, 'Index'])->name('patients.index');

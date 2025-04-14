@@ -293,7 +293,8 @@ const Index = ({ departments }) => {
                     <Select
                         className="w-100"
                         placeholder="Select Parent"
-                        allowClear
+                        allowClear showSearch
+                        optionFilterProp="label"
                         value={values.parent_id}
                         onChange={(id) => onChangeDepVal("parent_id", id ?? null)}
                         options={departments.map((dep) => ({

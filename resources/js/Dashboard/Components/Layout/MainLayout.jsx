@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
-import { Layout, Breadcrumb } from "antd";
+import { Layout, Breadcrumb, Modal } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css";
 const { Header, Content } = Layout;
 const MainLayout = ({ children }) => {
-    const [collapsed, setCollapsed] = useState(false);
     return (
         <Layout className="main">
             {/* Main Content Area */}
@@ -75,7 +74,6 @@ const MainLayout = ({ children }) => {
                                 />
                             </div>
                         </div>
-
                     </div>
                 </Header>
                 {/* Page Content */}

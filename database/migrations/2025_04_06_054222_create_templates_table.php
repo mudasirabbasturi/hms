@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('templates', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained(table: 'users', indexName: 'templates_user_id')->onDelete('cascade');
-            $table->enum('type', ['prescription', 'diagnosis', 'note'])->default('prescription');
-            $table->string('title');
-            $table->longText('content');
+            $table->string('name');
+            $table->boolean('show')->default(true);
+            $table->json('choices')->nullable();
             $table->timestamps();
         });
     }
