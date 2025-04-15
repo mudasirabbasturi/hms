@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import {
     /** Inertia.js - For page navigation and routing */
     router,
@@ -14,7 +14,7 @@ import {
 import AddPatient from "@shared/Create/Patient/AddPatient"
 const { TextArea } = Input
 
-const AddToken = ({ open, onCancel, doctors, patients, departments }) => {
+const HandleToken = ({ open, onCancel, mode, tokenData, doctors, patients, departments }) => {
     const [showPatientModal, setShowPatientModal] = useState(false)
     const defaultValues = {
         user_id: '', patient_id: '', status: 'Scheduled',
@@ -24,6 +24,12 @@ const AddToken = ({ open, onCancel, doctors, patients, departments }) => {
     const [values, setValues] = useState(defaultValues)
     const [loading, setLoading] = useState(false)
 
+    useEffect(() => {
+        if (open) {
+            setValues({ ...defaultValues, ...tokenData });
+        }
+    }, [open, tokenData]);
+
     const onChange = (key, value) => {
         setValues(prev => ({
             ...prev,
@@ -31,24 +37,30 @@ const AddToken = ({ open, onCancel, doctors, patients, departments }) => {
         }));
     }
 
-    const onSubmit = () => {
+    const handleSubmit = () => {
         setLoading(true);
-        router.post('/opd/token/store', values, {
+        const method = mode === 'update' ? 'put' : 'post';
+        const url =
+            mode === 'update'
+                ? `/opd/token/update/${values.token_id}`
+                : `/opd/token/store`;
+
+        router[method](url, values, {
             preserveScroll: true,
             onSuccess: () => {
-                setValues(defaultValues)
-                onCancel()
+                setValues(defaultValues);
+                onCancel();
             },
             onError: () => setLoading(false),
             onFinish: () => setLoading(false),
-        })
-    }
+        });
+    };
 
     return (
         <Modal
             title={
                 <div className="d-flex justify-content-between">
-                    <span>Add Token</span>
+                    <span>{mode === 'update' ? 'Update Token' : 'Add Token'}</span>
                     <span>
                         <CloseOutlined onClick={() => {
                             setValues(defaultValues)
@@ -62,8 +74,9 @@ const AddToken = ({ open, onCancel, doctors, patients, departments }) => {
                 setValues(defaultValues)
                 onCancel()
             }}
-            onOk={onSubmit}
-            okText="Add Token" maskClosable={false} closeIcon={false}
+            onOk={handleSubmit}
+            okText={mode === 'update' ? 'Update Token' : 'Add Token'}
+            maskClosable={false} closeIcon={false}
             styles={{
                 body: {
                     padding: "20px 0px"
@@ -165,4 +178,4 @@ const AddToken = ({ open, onCancel, doctors, patients, departments }) => {
     );
 };
 
-export default AddToken;
+export default HandleToken;

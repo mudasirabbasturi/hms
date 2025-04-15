@@ -61,13 +61,17 @@ class PatientController extends Controller
     // View Single Patient Record
     public function View(Request $request, $id)
     {
+        $patients = Patient::cursor();
         $patient = Patient::findOrFail($id);
         $profile = Storage::url($patient->profile);
         $departments = Department::cursor();
+            $doctors = User::select('id', 'name')->where('type', 'doctor')->cursor();
         return Inertia::render('Components/Patient/Show', [
+            'patients' => $patients,
             'patient' => $patient,
             'profile' => $profile,
             'departments' => $departments,
+            'doctors' => $doctors,
         ]);
     }
 

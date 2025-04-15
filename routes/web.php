@@ -9,6 +9,7 @@ use App\Http\Controllers\TimingController;
 use App\Http\Controllers\ProcedureController;
 use App\Http\Controllers\ShareController;
 use App\Http\Controllers\PatientController;
+use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\PrescriptionController;
 use App\Http\Controllers\VitalController;
@@ -41,6 +42,9 @@ Route::post('/patient/store', [PatientController::class, 'Store'])->name('patien
 Route::get('/patient/view/{id}', [PatientController::class, 'View'])->name('patient.view');
 Route::put('/patient/upate/column/{id}', [PatientController::class, 'updateSingleColumn'])->name('patient.update.single-column');
 Route::delete('/patient/destroy/{id}', [PatientController::class, 'Destroy'])->name('patient.destroy');
+
+// Template 
+Route::get('/templates', [TemplateController::class, 'Index'])->name('templates.index');
 
 // Prescriptions
 Route::get('/prescriptions',[PrescriptionController::class, 'Index'])->name('prescriptions.index');

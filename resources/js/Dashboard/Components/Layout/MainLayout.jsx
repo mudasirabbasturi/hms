@@ -50,6 +50,7 @@ const MainLayout = ({ children }) => {
                                             ]
                                         }
                                     },
+                                    { title: <Link href="/templates">Template</Link> },
                                 ]}
                             />
                             <div className="me-4">
