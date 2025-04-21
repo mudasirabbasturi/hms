@@ -3,38 +3,44 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Medication;
-use App\Models\Prescription;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class MedicationSeeder extends Seeder
 {
     public function run(): void
     {
-        $medicineList = [
-            ['Paracetamol', '500mg', 'Twice a day', '5 days', 'After food'],
-            ['Ibuprofen', '200mg', 'Three times a day', '7 days', 'After meals'],
-            ['Amoxicillin', '250mg', 'Once a day', '3 days', 'Before food'],
-            ['Cough Syrup', '10ml', 'Twice a day', '4 days', 'Shake well before use'],
-            ['Antacid', '1 tablet', 'After meals', '5 days', 'Avoid spicy food'],
-        ];
+        $medicalRecords = DB::table('medical_records')->get();
 
-        $prescriptions = Prescription::all();
-
-        foreach ($prescriptions as $prescription) {
-            $medCount = rand(1, 3);
-            $selectedMeds = collect($medicineList)->random($medCount);
-
-            foreach ($selectedMeds as $med) {
-                Medication::create([
-                    'prescription_id' => $prescription->id,
-                    'medicine_name'   => $med[0],
-                    'dosage'          => $med[1],
-                    'frequency'       => $med[2],
-                    'duration'        => $med[3],
-                    'instructions'    => $med[4],
-                ]);
-            }
+        foreach ($medicalRecords as $record) {
+            DB::table('medications')->insert([
+                [
+                    'medical_record_id' => $record->id,
+                    'name' => 'Paracetamol',
+                    'duration' => '5 days',
+                    'morning' => true,
+                    'afternoon' => false,
+                    'evening' => true,
+                    'night' => false,
+                    'route' => 'oral',
+                    'instructions' => 'Take after meals. Avoid alcohol.',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'medical_record_id' => $record->id,
+                    'name' => 'Amoxicillin',
+                    'duration' => '7 days',
+                    'morning' => true,
+                    'afternoon' => true,
+                    'evening' => false,
+                    'night' => true,
+                    'route' => 'oral',
+                    'instructions' => 'Complete the full course even if you feel better.',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            ]);
         }
     }
 }
-

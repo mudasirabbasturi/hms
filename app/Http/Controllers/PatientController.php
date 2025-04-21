@@ -8,7 +8,9 @@ use App\Models\Patient;
 use App\Models\User;
 use App\Models\Department;
 use App\Models\Appointment;
-use App\Models\Prescription;
+use App\Models\MedicalRecord;
+use App\Models\Medication;
+use App\Models\Template;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,100 +63,16 @@ class PatientController extends Controller
     // View Single Patient Record
     public function View(Request $request, $id)
     {
-        $patients = Patient::cursor();
         $patient = Patient::findOrFail($id);
         $profile = Storage::url($patient->profile);
-        $departments = Department::cursor();
-            $doctors = User::select('id', 'name')->where('type', 'doctor')->cursor();
+        $medicalRecords = MedicalRecord::where('patient_id', $id)->cursor();
+        $templates = Template::where('user_id', 2)->cursor();
         return Inertia::render('Components/Patient/Show', [
-            'patients' => $patients,
             'patient' => $patient,
             'profile' => $profile,
-            'departments' => $departments,
-            'doctors' => $doctors,
+            'medicalRecords' => $medicalRecords,
+            'templates' => $templates,
         ]);
-    }
-
-    // Update Patient Single Column Data 
-    public function updateSingleColumn(Request $request, $id) {
-        $patient = Patient::findOrFail($id);
-        $validationRules = [];
-        $value = [];
-        if ($request->has('name')) {
-            $validationRules['name'] = 'required|string|max:255';
-            $value = "Name";
-        }
-        if ($request->has('gender')) {
-            $validationRules['gender'] = 'required|string|in:Male,Female,Other';
-            $value = "Gender";
-        }
-        if ($request->has('dob')) {
-            $validationRules['dob'] = 'required|date';
-            $value = "Date Of Birth";
-        }
-        if ($request->has('email')) {
-            $validationRules['email'] = 'nullable|string|email|max:255|unique:patients,email,' . $patient->id;
-            $value = "Email";
-        }
-        if ($request->has('phone')) {
-            $validationRules['phone'] = 'nullable|string|min:8|max:20';
-            $value = "Phone";
-        }
-        if ($request->has('cnic')) {
-            $validationRules['cnic'] = 'nullable|string|unique:patients,cnic,' . $patient->id;
-            $value = "CNIC Number";
-        }
-        if ($request->has('departments')) {
-            $validationRules['departments'] = 'nullable|string';
-            $value = "Departments";
-        }
-        if ($request->has('blood_group')) {
-            $validationRules['blood_group'] = 'nullable|string|max:5';
-            $value = "Blood Group";
-        }
-        if ($request->has('symptoms')) {
-            $validationRules['symptoms'] = 'nullable|string';
-            $value = "Symptoms";
-        }
-        if ($request->has('visit_purpose')) {
-            $validationRules['visit_purpose'] = 'nullable|string|max:255';
-            $value = "Purpose Of Visit";
-        }
-        if ($request->has('patient_father_name')) {
-            $validationRules['patient_father_name'] = 'nullable|string|max:255';
-            $value = "Patient Father Name";
-        }
-        if ($request->has('patient_mother_name')) {
-            $validationRules['patient_mother_name'] = 'nullable|string|max:255';
-            $value = "Patient Mother Name";
-        }
-        if ($request->has('patient_address')) {
-            $validationRules['patient_address'] = 'nullable|string';
-            $value = "Patient Address";
-        }
-        if ($request->has('insurance_name')) {
-            $validationRules['insurance_name'] = 'nullable|string|max:255';
-            $value = "Insurance Name";
-        }
-        if ($request->has('insurance_number')) {
-            $validationRules['insurance_number'] = 'nullable|string|max:50';
-            $value = "Insurance Number";
-        }
-        if ($request->has('insurance_holder')) {
-            $validationRules['insurance_holder'] = 'nullable|string|max:255';
-            $value = "Insurance Holder";
-        }
-        if ($request->has('insurance_type')) {
-            $validationRules['insurance_type'] = 'nullable|string|max:255';
-            $value = "Insurance Type";
-        }
-        if ($request->has('profile')) {
-            $validationRules['profile'] = 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048';
-            $value = "Profile";
-        }
-        $validatedData = $request->validate($validationRules);
-        $patient->update($validatedData);
-        return back()->with('message', $value . ' updated successfully!');
     }
 
     // Delete Patient Record

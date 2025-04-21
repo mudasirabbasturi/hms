@@ -12,4 +12,15 @@ class Template extends Model
         'show',
         'choices',
     ];
+
+    public function getChoicesAttribute($value)
+    {
+        return json_decode($value ?? '[]');
+    }
+
+    public function setChoicesAttribute($value)
+    {
+        $this->attributes['choices'] = json_encode($value ?? []);
+    }
+    
 }

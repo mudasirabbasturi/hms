@@ -39,18 +39,24 @@ const MainLayout = ({ children }) => {
                                             ],
                                         },
                                     },
+                                    { title: <Link href="/medical-records">Medical Records</Link> },
+                                    { title: <Link href="/templates">Templates</Link> },
                                     {
-                                        title: "Medical Record",
+                                        title: "Inventory",
                                         menu: {
                                             items: [
-                                                { title: <Link href="/prescriptions">Prescription</Link> },
-                                                { title: <Link href="/vitals">Vitals</Link> },
-                                                { title: <Link href="/medications">Medications</Link> },
-                                                { title: <Link href="/medical-histories">Medical Histories</Link> },
+                                                { title: <Link href="/Items">Items</Link> },
+                                                { title: <Link href="/manage-stock">Manage Stock</Link> },
+                                                { title: <Link href="/consume-stock">Consume Stock</Link> },
+                                                { title: <Link href="/stock-adjustment">Stock Adjustment</Link> },
+                                                { title: <Link href="/stock-request">Asset Request And Return</Link> },
+                                                { title: <Link href="/stock-suppliers">Stock Suppliers</Link> },
+                                                { title: <Link href="/purchase-order">Purchase Order</Link> },
+                                                { title: <Link href="/purchase-requisition">Purchase Requisition</Link> },
+                                                { title: <Link href="/manufacturers">Manufacturers</Link> },
                                             ]
                                         }
                                     },
-                                    { title: <Link href="/templates">Template</Link> },
                                 ]}
                             />
                             <div className="me-4">
@@ -61,7 +67,7 @@ const MainLayout = ({ children }) => {
                                             title: "REPORTS",
                                             menu: {
                                                 items: [
-                                                    { title: <Link href="/patient/create">OPD</Link> },
+                                                    { title: <Link href="">OPD</Link> },
                                                     { title: "Patients" },
                                                     { title: "IPD" },
                                                     { title: "Pharmacy" },

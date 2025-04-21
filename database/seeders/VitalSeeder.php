@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Vital;
-use App\Models\Appointment;
+use App\Models\MedicalRecord;
 
 class VitalSeeder extends Seeder
 {
@@ -13,12 +13,11 @@ class VitalSeeder extends Seeder
      */
     public function run(): void
     {
-        $appointments = Appointment::all();
+        $MedicalRecords = MedicalRecord::all();
 
-        foreach ($appointments as $appointment) {
+        foreach ($MedicalRecords as $MedicalRecord) {
             Vital::create([
-                'patient_id'        => $appointment->patient_id,
-                'appointment_id'    => $appointment->id,
+                'medical_record_id' => $MedicalRecord->id,
                 'pulse'             => rand(60, 100),
                 'temperature'       => round(rand(970, 1000) / 10, 1), // 97.0 - 100.0
                 'systolic_bp'       => rand(100, 140),

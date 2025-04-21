@@ -14,6 +14,7 @@ class ShiftSeeder extends Seeder
      */
     public function run(): void
     {
+        
         $shifts = [
             'Morning Shift',
             'Afternoon Shift',
@@ -34,5 +35,6 @@ class ShiftSeeder extends Seeder
         foreach ($shifts as $shift) {
             Shift::create(['name' => $shift]);
         }
+
     }
 }

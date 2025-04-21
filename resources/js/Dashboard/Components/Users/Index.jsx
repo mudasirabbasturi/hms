@@ -234,7 +234,7 @@ const Index = ({ users, type, departments }) => {
             </div >
 
             {/* Add User Modal Start */}
-            < Modal
+            <Modal
                 title={
                     <>
                         <div className="d-flex justify-content-between">
@@ -441,7 +441,7 @@ const Index = ({ users, type, departments }) => {
                         </div>
                     </div>
                 </div>
-            </Modal >
+            </Modal>
             {/** Add User Modal End */}
         </>
     )
