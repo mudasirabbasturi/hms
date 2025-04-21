@@ -1,117 +1,25 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
-    /** Inertia.js - */
-    Link, router, usePage,
-    /** Ant Design Components  */
-    notification, Breadcrumb, Tooltip, Popconfirm, Select,
-    Modal, Checkbox, Input, Collapse,
-    /** Ant Design Icons - */
-    PlusCircleOutlined, EditOutlined, DeleteOutlined,
-    CloseOutlined,
-    /** Day.js  */
-    /** React International Phone */
-} from "@shared/Ui"
+    /** Inertia.js */
+    Link, usePage, router,
+    /** Ant Design Components */
+    notification, Breadcrumb, Card, Avatar, Collapse,
+    Input, Checkbox, Tooltip, Modal, Select,
+    /** Ant Design Icons */
+    PlusCircleOutlined, UserOutlined, MoreOutlined, PlusOutlined,
+    EditOutlined, CloseOutlined,
+    /** Day js */
+    dayjs
 
+} from "@shared/Ui";
 
-const { TextArea } = Input
+const { Meta } = Card;
 const { Panel } = Collapse;
+const { TextArea } = Input;
 
-
-import useDynamicHeight from "@shared/DynamicHeight";
-import { AgGridReact, gridTheme, defaultColDef } from "@shared/AgGridConfig";
-
-const Index = ({ medicalRecords, doctors, patients, templates }) => {
-
-    { /**  Dynamic Height Start*/ }
-    const dynamicHeight = useDynamicHeight();
-    {/**  Dynamic Height End */ }
-
-    {/** Render Template Data Inside AG-GRID Start */ }
-    const [rowData, setRowData] = useState([]);
-
-    useEffect(() => {
-        if (medicalRecords) {
-            setRowData(medicalRecords);
-        }
-    }, [medicalRecords]);
-
-    const colDefs = useMemo(() => [
-        {
-            headerName: "Added By Doctor",
-            field: "user_name",
-        },
-        {
-            headerName: "Patient",
-            field: "patient_name",
-        },
-        {
-            field: "complaint",
-            cellEditor: "agLargeTextCellEditor",
-            cellEditorPopup: true,
-        },
-        {
-            field: "examination",
-            cellEditor: "agLargeTextCellEditor",
-            cellEditorPopup: true,
-        },
-        {
-            field: "treatment",
-            cellEditor: "agLargeTextCellEditor",
-            cellEditorPopup: true,
-        },
-        {
-            field: "prescription",
-            cellEditor: "agLargeTextCellEditor",
-            cellEditorPopup: true,
-        },
-        {
-            field: "medical_history",
-            cellEditor: "agLargeTextCellEditor",
-            cellEditorPopup: true,
-        },
-        {
-            field: "action",
-            headerName: "Action",
-            filter: false,
-            sortable: false,
-            cellRenderer: (params) => (
-                <>
-                    <Tooltip title={`Update Medical Record`} color="volcano" placement="leftTop">
-                        <EditOutlined
-                            style={{ border: "1px dashed #FA541C" }}
-                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                            onClick={() => {
-                                setMode("update");
-                                setValues({
-                                    id: params.data.id,
-                                    patient_id: params.data.patient_id,
-                                    user_id: params.data.user_id,
-                                    complaint: params.data.complaint,
-                                    examination: params.data.examination,
-                                    treatment: params.data.treatment,
-                                    prescription: params.data.prescription,
-                                    medical_history: params.data.medical_history,
-                                });
-                                setShowModal(true);
-                            }}
-                        />
-                    </Tooltip>
-
-                    <Tooltip title={`Delete Medical Record`} color="red" placement="leftTop">
-                        <Popconfirm title={`Are you sure you want to delete record?`}
-                            onConfirm={() => confirmDelMedicalRecord(params.data.id)}
-                            okText="Yes"
-                            cancelText="No">
-                            <DeleteOutlined
-                                style={{ border: "1px dashed red" }}
-                                className="btn btn-sm  me-1 pt-1 pb-1 ps-2 pe-2" />
-                        </Popconfirm>
-                    </Tooltip>
-                </>
-            ),
-        },
-    ], []);
-    {/** Render Template Data Inside AG-GRID End */ }
+const Show = ({ patient, profile, medicalRecords, doctors, templates }) => {
+    const [imageError, setImageError] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const defaultValues = {
         id: null, patient_id: '', user_id: '', complaint: '',
@@ -119,7 +27,6 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
         medical_history: '',
     };
     const [values, setValues] = useState(defaultValues)
-    const [loading, setLoading] = useState(false)
     const [ShowModal, setShowModal] = useState(false);
     const [mode, setMode] = useState("add");
 
@@ -161,32 +68,93 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
         });
     };
 
-    // Popconfirm Patients Delete
-    const confirmDelMedicalRecord = (id) =>
-        new Promise((resolve) => {
-            router.delete(`/medical-record/destroy/${id}`, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    resolve();
-                },
-                onError: () => {
-                    message.error("Failed to delete department");
-                },
-            });
-        });
+    const records = medicalRecords.map((item, index) => ({
+        key: String(index),
+        label: `Medical Records For : ${patient.name} | Created At : ${dayjs(item.created_at).format('DD MMM YYYY, hh:mm A')}`,
+        children: (
+            <Collapse accordion>
+                {/* Complaint */}
+                <Panel header="Complaint" key="complaint">
+                    {item.complaint}
+                </Panel>
+                {/* Medical History */}
+                <Panel header="Medical History" key="history">
+                    {item.medical_history}
+                </Panel>
+                {/* Examination */}
+                <Panel header="Examination" key="examination">
+                    {item.examination}
+                </Panel>
+                {/* Treatment */}
+                <Panel header="Treatment" key="treatment">
+                    {item.treatment}
+                </Panel>
+                {/* Prescription */}
+                <Panel header="Prescription" key="prescription">
+                    {item.prescription}
+                </Panel>
+                {/* Medication (Optional - adjust if you have data) */}
+                <Panel header="Medication" key="medication">
+                    <p>No medication info provided.</p>
+                </Panel>
+                <div className="d-flex justify-content-end pt-3 pb-3 border border-start-0 border-top-0 border-end-0">
+                    <Tooltip
+                        title={`Update Medical Record`} color="volcano" placement="top">
+                        <button
+                            style={{ border: "1px dashed rgb(235, 250, 28)" }}
+                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
+                            onClick={() => {
+                                setMode("update");
+                                setValues({
+                                    id: item.id,
+                                    patient_id: item.patient_id,
+                                    user_id: item.user_id,
+                                    complaint: item.complaint,
+                                    examination: item.examination,
+                                    treatment: item.treatment,
+                                    prescription: item.prescription,
+                                    medical_history: item.medical_history,
+                                });
+                                setShowModal(true);
+                            }}>
+                            <EditOutlined /> Update Medical Record
+                        </button>
+                    </Tooltip>
+                    <Tooltip
+                        title={`Add Another Medical Record`} color="volcano" placement="top">
+                        <button
+                            style={{ border: "1px dashed #FA541C" }}
+                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
+                            onClick={() => {
+                                setMode("add");
+                                setValues({
+                                    id: item.id,
+                                    patient_id: item.patient_id,
+                                    user_id: item.user_id,
+                                });
+                                setShowModal(true);
+                            }}>
+                            <PlusOutlined /> Add Another Record
+                        </button>
+                    </Tooltip>
+                </div>
+            </Collapse>
+        ),
+    }));
 
-    {/** Flash Messages */ }
     const { flash, errors } = usePage().props;
     const [api, contextHolder] = notification.useNotification();
+    /** Flash Success Message */
     useEffect(() => {
         if (flash.message) {
             api.success({
                 message: "Success",
                 description: flash.message,
                 placement: "topRight",
-            })
+            });
         }
     }, [flash]);
+    /** Flash Validation Errors */
     useEffect(() => {
         if (errors && Object.keys(errors).length > 0) {
             Object.entries(errors).forEach(([field, messages]) => {
@@ -195,55 +163,136 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                     message: "Validation Error",
                     description: errorText,
                     placement: "topRight",
-                })
-            })
+                });
+            });
         }
     }, [errors]);
-    {/** Flash Messages End */ }
-
     return (
         <>
             {contextHolder}
             <div className="container-fluid">
                 <div className="row bodyHeader mt-2 mb-2">
-                    <div className="col-12 pt-2 pb-2 bg-white 
-                           d-flex justify-content-between flex-wrap 
-                           align-items-center border border-bottom-1 
-                           border-top-0 border-s-0 border-e-0">
+                    <div className="col-12 pt-2 pb-2 bg-white d-flex justify-content-between flex-wrap align-items-center border border-bottom-1 border-top-0 border-s-0 border-e-0">
                         <div>
                             <Breadcrumb
                                 items={[
                                     { title: <Link href="/">Dashboard</Link> },
-                                    { title: "Medical Records" },
+                                    { title: <Link href="/patients">Patients</Link> },
+                                    { title: patient.name }
                                 ]}
                             />
                         </div>
                         <div>
                             <button
                                 className="btn btn-outline-primary btn-sm"
-                                style={{ borderStyle: "dashed" }}
-                                onClick={openModal}>
+                                style={{ borderStyle: "dashed" }}>
                                 <PlusCircleOutlined className="me-1" />
-                                Medical Records
+                                Token
                             </button>
                         </div>
                     </div>
                 </div>
                 <div className="row">
-                    <div
-                        className="col-12"
-                        style={{
-                            height: dynamicHeight,
-                            overflow: "hidden",
-                        }}>
-                        <AgGridReact
-                            rowData={rowData}
-                            columnDefs={colDefs}
-                            defaultColDef={defaultColDef}
-                            theme={gridTheme}
-                            pagination={true}
-                            paginationAutoPageSize={true}
-                        />
+                    <div className="col-md-3">
+                        <div className="row">
+                            <div className="col-12 mb-3">
+                                <Card
+                                    styles={{
+                                        header: {
+                                            backgroundColor: "#eee",
+                                            minHeight: "44px"
+                                        },
+                                    }}
+                                    title={
+                                        <>
+                                            <div className="d-flex justify-content-between">
+                                                <div></div>
+                                                <div><MoreOutlined /></div>
+                                            </div>
+                                        </>
+                                    }>
+                                    <Meta
+                                        description={
+                                            <>
+                                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                                    <div
+                                                        style={{ maxWidth: '200px', backgroundColor: "white" }}>
+                                                        {!imageError ? (
+                                                            <img
+                                                                alt={patient.name}
+                                                                src={profile}
+                                                                style={{ width: '100%', borderRadius: "50%" }}
+                                                                onError={() => setImageError(true)}
+                                                            />
+                                                        ) : (
+                                                            <Avatar size={100} icon={<UserOutlined />} />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <hr></hr>
+                                                <p className="text-center mb-1"><b>ID: </b>{patient.patient_id}</p>
+                                                <p className="text-center mb-1"><b>Name: </b>{patient.name}</p>
+                                                <p className="text-center mb-1">
+                                                    <b>Gender: </b>{patient.gender} | <b>DOB: </b>{patient.dob}
+                                                </p>
+                                                <p className="text-center mb-1"><b>Email: </b>{patient.email}</p>
+                                                <p className="text-center mb-1"><b>Phone: </b>{patient.phone}</p>
+                                                <div className="d-flex justify-content-center mt-3">
+                                                    <button
+                                                        className="btn btn-sm btn-primary">Add Reminder</button>
+                                                </div>
+                                            </>
+                                        }
+                                    />
+
+                                </Card>
+                            </div>
+                            <div className="col-12 mb-3">
+                            </div>
+                        </div>
+                    </div>
+                    <div className="col-md-9">
+                        <div className="container-fluid">
+                            <div className="row">
+                                <div className="col-md-9">
+                                    <div className="row">
+                                        <div className="col-12 mb-3">
+                                            <Card
+                                                styles={{
+                                                    header: {
+                                                        backgroundColor: "#eee",
+                                                        minHeight: "44px",
+                                                    },
+                                                }}
+                                                title={
+                                                    <>
+                                                        <div className="d-flex justify-content-between">
+                                                            <div>Medical Records</div>
+                                                            <div><PlusOutlined /></div>
+                                                        </div>
+                                                    </>
+                                                }>
+                                                <div>
+                                                    <Collapse
+                                                        styles={{
+                                                            contentBg: {
+                                                                backgroundColor: "red"
+                                                            }
+                                                        }}
+                                                        accordion
+                                                        items={records}
+                                                    />
+                                                </div>
+                                            </Card>
+                                        </div>
+                                        <div className="col-12 mb-3">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-3">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -288,22 +337,6 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                     options={doctors.map((doc) => ({
                                         value: doc.id,
                                         label: doc.name,
-                                    }))}
-                                    disabled={loading || mode === 'update'}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-3">
-                                <label className="me-1">Patient:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Patient"
-                                    allowClear showSearch
-                                    optionFilterProp="label"
-                                    value={values.patient_id || null}
-                                    onChange={(data) => onChange("patient_id", data)}
-                                    options={patients.map((pat) => ({
-                                        value: pat.id,
-                                        label: pat.name,
                                     }))}
                                     disabled={loading || mode === 'update'}
                                 />
@@ -458,7 +491,6 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                 </div>
             </Modal>
         </>
-    );
-};
-
-export default Index;
+    )
+}
+export default Show

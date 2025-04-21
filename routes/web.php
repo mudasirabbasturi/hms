@@ -65,7 +65,7 @@ Route::delete('/department/{id}', [DepartmentController::class, 'Destroy'])->nam
 Route::get('/patients', [PatientController::class, 'Index'])->name('patients.index');
 Route::post('/patient/store', [PatientController::class, 'Store'])->name('patient.store');
 Route::get('/patient/view/{id}', [PatientController::class, 'View'])->name('patient.view');
-Route::put('/patient/upate/column/{id}', [PatientController::class, 'updateSingleColumn'])->name('patient.update.single-column');
+Route::put('/patient/update/{id}', [PatientController::class, 'Update'])->name('patient.update');
 Route::delete('/patient/destroy/{id}', [PatientController::class, 'Destroy'])->name('patient.destroy');
 
 // Template 

@@ -20,7 +20,7 @@ const { Panel } = Collapse;
 import useDynamicHeight from "@shared/DynamicHeight";
 import { AgGridReact, gridTheme, defaultColDef } from "@shared/AgGridConfig";
 
-const Index = ({ medicalRecords, doctors, patients, templates }) => {
+const Index = ({ medicalRecords, doctors, users, patients, templates }) => {
 
     { /**  Dynamic Height Start*/ }
     const dynamicHeight = useDynamicHeight();
@@ -37,8 +37,13 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
 
     const colDefs = useMemo(() => [
         {
-            headerName: "Added By Doctor",
+            headerName: "Added By",
             field: "user_name",
+            valueGetter: (params) => {
+                const name = params.data.user_name || "Unknown";
+                const type = params.data.user_type ? ` (${params.data.user_type})` : "";
+                return name + type;
+            },
         },
         {
             headerName: "Patient",
@@ -98,8 +103,8 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                     </Tooltip>
 
                     <Tooltip title={`Delete Medical Record`} color="red" placement="leftTop">
-                        <Popconfirm title={`Are you sure you want to delete record?`}
-                            onConfirm={() => confirmDelMedicalRecord(params.data.id)}
+                        <Popconfirm title={`Are you sure you want to delete "${params.data.name}"?`}
+                            // onConfirm={() => confirmDelMedicalRecord(params.data.id)}
                             okText="Yes"
                             cancelText="No">
                             <DeleteOutlined
@@ -114,7 +119,7 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
     {/** Render Template Data Inside AG-GRID End */ }
 
     const defaultValues = {
-        id: null, patient_id: '', user_id: '', complaint: '',
+        patient_id: '', user_id: '', complaint: '',
         examination: '', treatment: '', prescription: '',
         medical_history: '',
     };
@@ -154,26 +159,12 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
             preserveScroll: true,
             onSuccess: () => {
                 setValues(defaultValues);
-                setShowModal(false);
+                onCancel();
             },
             onError: () => setLoading(false),
             onFinish: () => setLoading(false),
         });
     };
-
-    // Popconfirm Patients Delete
-    const confirmDelMedicalRecord = (id) =>
-        new Promise((resolve) => {
-            router.delete(`/medical-record/destroy/${id}`, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    resolve();
-                },
-                onError: () => {
-                    message.error("Failed to delete department");
-                },
-            });
-        });
 
     {/** Flash Messages */ }
     const { flash, errors } = usePage().props;
@@ -278,7 +269,7 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                         <div className="col-md-6">
                             <div className="d-flex align-items-center mb-3">
                                 <label className="me-1">Doctor</label>
-                                <Select
+                                {/* <Select
                                     className="w-100"
                                     placeholder="Select Doctors"
                                     allowClear showSearch
@@ -290,7 +281,20 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                         label: doc.name,
                                     }))}
                                     disabled={loading || mode === 'update'}
+                                /> */}
+                                <Select
+                                    className="w-100"
+                                    placeholder="Select Doctor or Template"
+                                    value={values.user_id || null}
+                                    optionFilterProp="label"
+                                    onChange={(data) => onChange("user_id", data)}
+                                    disabled={loading}
+                                    options={users.map((doc) => ({
+                                        value: doc.id,
+                                        label: doc.name,
+                                    }))}
                                 />
+
                             </div>
                             <div className="d-flex align-items-center mb-3">
                                 <label className="me-1">Patient:</label>
@@ -316,17 +320,6 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                     allowClear
                                     value={values.complaint || null}
                                     onChange={(e) => onChange("complaint", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-3">
-                                <label className="me-1">Medical History:</label>
-                                <TextArea
-                                    autoSize={{ minRows: 2 }}
-                                    placeholder="Fever,Cough,Nausea,Dizziness,Vomiting"
-                                    allowClear
-                                    value={values.medical_history || null}
-                                    onChange={(e) => onChange("medical_history", e.target.value)}
                                     disabled={loading}
                                 />
                             </div>
@@ -363,6 +356,17 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                     disabled={loading}
                                 />
                             </div>
+                            <div className="mb-3">
+                                <label className="me-1">Medical History:</label>
+                                <TextArea
+                                    autoSize={{ minRows: 2 }}
+                                    placeholder="Fever,Cough,Nausea,Dizziness,Vomiting"
+                                    allowClear
+                                    value={values.medical_history || null}
+                                    onChange={(e) => onChange("medical_history", e.target.value)}
+                                    disabled={loading}
+                                />
+                            </div>
                         </div>
                         <div className="col-md-6">
                             <div
@@ -373,7 +377,7 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                     placeholder="Select Doctor From Left Side"
                                     value={values.user_id || null}
                                     optionFilterProp="label"
-                                    options={doctors.map((doc) => ({
+                                    options={users.map((doc) => ({
                                         value: doc.id,
                                         label: doc.name,
                                     }))}
@@ -381,75 +385,61 @@ const Index = ({ medicalRecords, doctors, patients, templates }) => {
                                 />
 
                                 <Collapse accordion>
-                                    {values.user_id ? (
-                                        templates.filter((tpl) => tpl.user_id === values.user_id).length === 0 ? (
-                                            <div className="text-muted text-center pb-2 pt-2">
-                                                No templates have been added by this doctor.
-                                            </div>
-                                        ) : (
-                                            templates
-                                                .filter((tpl) => tpl.user_id === values.user_id)
-                                                .map((tpl) => {
-                                                    const parsedChoices = Array.isArray(tpl.choices)
-                                                        ? tpl.choices
-                                                        : JSON.parse(tpl.choices || '[]');
+                                    {templates
+                                        .filter((tpl) => tpl.user_id === values.user_id)
+                                        .map((tpl) => {
+                                            const parsedChoices = Array.isArray(tpl.choices)
+                                                ? tpl.choices
+                                                : JSON.parse(tpl.choices || '[]');
 
-                                                    const targetField = templateTargetFields?.[tpl.id] || "complaint";
+                                            const targetField = templateTargetFields?.[tpl.id] || "complaint";
 
-                                                    return (
-                                                        <Panel key={tpl.id} header={tpl.name}>
-                                                            <div className="mb-2 d-flex align-items-center">
-                                                                <label className="me-2">Apply to:</label>
-                                                                <Select
-                                                                    style={{ width: 200 }}
-                                                                    value={targetField}
-                                                                    onChange={(val) =>
-                                                                        setTemplateTargetFields((prev) => ({
-                                                                            ...prev,
-                                                                            [tpl.id]: val,
-                                                                        }))
-                                                                    }
-                                                                    options={[
-                                                                        { label: "Complaint", value: "complaint" },
-                                                                        { label: "Medical History", value: "medical_history" },
-                                                                        { label: "Examination", value: "examination" },
-                                                                        { label: "Treatment", value: "treatment" },
-                                                                        { label: "Prescription", value: "prescription" },
-                                                                    ]}
-                                                                />
-                                                            </div>
+                                            return (
+                                                <Panel key={tpl.id} header={tpl.name}>
+                                                    <div className="mb-2 d-flex align-items-center">
+                                                        <label className="me-2">Apply to:</label>
+                                                        <Select
+                                                            style={{ width: 200 }}
+                                                            value={targetField}
+                                                            onChange={(val) =>
+                                                                setTemplateTargetFields((prev) => ({
+                                                                    ...prev,
+                                                                    [tpl.id]: val,
+                                                                }))
+                                                            }
+                                                            options={[
+                                                                { label: "Complaint", value: "complaint" },
+                                                                { label: "Examination", value: "examination" },
+                                                                { label: "Treatment", value: "treatment" },
+                                                                { label: "Prescription", value: "prescription" },
+                                                                { label: "Medical History", value: "medical_history" },
+                                                            ]}
+                                                        />
+                                                    </div>
 
-                                                            <Checkbox.Group
-                                                                options={parsedChoices.map((choice) => ({
-                                                                    label: choice,
-                                                                    value: choice,
-                                                                }))}
-                                                                value={parsedChoices.filter((item) =>
-                                                                    (values[targetField] || "").split("\n").includes(item)
-                                                                )}
-                                                                onChange={(checkedValues) => {
-                                                                    const oldValue = values[targetField] || "";
-                                                                    const oldLines = oldValue
-                                                                        .split("\n")
-                                                                        .map(line => line.trim())
-                                                                        .filter(Boolean);
+                                                    <Checkbox.Group
+                                                        options={parsedChoices.map((choice) => ({
+                                                            label: choice,
+                                                            value: choice,
+                                                        }))}
+                                                        value={parsedChoices.filter((item) =>
+                                                            (values[targetField] || "").split("\n").includes(item)
+                                                        )}
+                                                        onChange={(checkedValues) => {
+                                                            const oldValue = values[targetField] || "";
+                                                            const oldLines = oldValue.split("\n").map(line => line.trim()).filter(Boolean);
+                                                            const cleaned = oldLines.filter(
+                                                                line => !parsedChoices.includes(line)
+                                                            );
+                                                            const finalLines = [...cleaned, ...checkedValues];
+                                                            const finalText = finalLines.join("\n");
 
-                                                                    const cleaned = oldLines.filter(
-                                                                        line => !parsedChoices.includes(line)
-                                                                    );
-
-                                                                    const finalLines = [...cleaned, ...checkedValues];
-                                                                    const finalText = finalLines.join("\n");
-
-                                                                    onChange(targetField, finalText);
-                                                                }}
-                                                            />
-                                                        </Panel>
-                                                    );
-                                                })
-                                        )
-                                    ) : null}
-
+                                                            onChange(targetField, finalText);
+                                                        }}
+                                                    />
+                                                </Panel>
+                                            );
+                                        })}
                                 </Collapse>
 
                             </div>

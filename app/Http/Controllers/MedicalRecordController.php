@@ -23,14 +23,12 @@ class MedicalRecordController extends Controller
             ->join('patients', 'medical_records.patient_id', '=', 'patients.id')
             ->orderBy('medical_records.created_at', 'desc')
             ->orderBy('medical_records.id', 'desc')->cursor();
-        $users = User::cursor();
         $doctors = User::where('type', "doctor")->cursor();
         $patients = Patient::cursor();
         $templates = Template::cursor();
 
         return inertia('Components/MedicalRecord/Index', [
             'medicalRecords' => $medicalRecords,
-            'users' => $users,
             'doctors' => $doctors,
             'patients' => $patients,
             'templates' => $templates,
@@ -49,6 +47,12 @@ class MedicalRecordController extends Controller
             'treatment' => 'nullable|string',
             'prescription' => 'nullable|string',
             'medical_history' => 'nullable|string',
+        ],
+        [
+            'user_id.required' => 'Please Select A Doctor.',
+            'user_id.exists'   => 'The Selected Doctor Is Invalid.',
+            'patient_id.required' => 'Please select A Patient.',
+            'patient_id.exists'   => 'The Selected Patient Is Invalid.',
         ]);
     
         MedicalRecord::create($validated);
@@ -60,6 +64,7 @@ class MedicalRecordController extends Controller
     {
         $medicalRecord = MedicalRecord::findOrFail($id);
         $updateData = $request->all();
+        $medicalRecord->update($updateData);
         return redirect()->back()->with('message', 'Medical record updated successfully!');
     }
     

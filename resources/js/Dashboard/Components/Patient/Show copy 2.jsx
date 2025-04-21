@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
     /** Inertia.js */
     Link, usePage, router,
     /** Ant Design Components */
     notification, Breadcrumb, Card, Avatar, Collapse,
-    Input, Checkbox, Tooltip, Modal, Select, DatePicker,
-    Popconfirm,
+    Input, Checkbox, Tooltip, Modal, Select,
     /** Ant Design Icons */
     PlusCircleOutlined, UserOutlined, MoreOutlined, PlusOutlined,
-    EditOutlined, CloseOutlined, DeleteOutlined,
+    EditOutlined, CloseOutlined,
     /** Day js */
-    dayjs, PhoneInput
+    dayjs
 
 } from "@shared/Ui";
 
@@ -18,9 +17,10 @@ const { Meta } = Card;
 const { Panel } = Collapse;
 const { TextArea } = Input;
 
-const Show = ({ patient, profile, medicalRecords, doctors, templates, departments }) => {
+const Show = ({ patient, profile, medicalRecords, doctors, templates }) => {
     const [imageError, setImageError] = useState(false);
     const [loading, setLoading] = useState(false);
+
     const defaultValues = {
         id: null, patient_id: '', user_id: '', complaint: '',
         examination: '', treatment: '', prescription: '',
@@ -113,14 +113,14 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                         {/* Update Button */}
                         <Tooltip title="Update Medical Record" color="volcano" placement="top">
                             <button
-                                style={{ border: "1px dashed rgb(252, 165, 4)" }}
+                                style={{ border: "1px dashed rgb(235, 250, 28)" }}
                                 className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
                                 onClick={() => {
                                     setMode("update");
                                     setValues({ ...item });
                                     setShowModal(true);
                                 }}>
-                                <EditOutlined />
+                                <EditOutlined /> Update Medical Record
                             </button>
                         </Tooltip>
                         {/* Add Another Button */}
@@ -136,19 +136,8 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                     });
                                     setShowModal(true);
                                 }}>
-                                <PlusOutlined />
+                                <PlusOutlined /> Add Another Record
                             </button>
-                        </Tooltip>
-                        {/* Add Another Button */}
-                        <Tooltip title={`Delete Medical Record`} color="red" placement="top">
-                            <Popconfirm title={`Are you sure you want to delete Record ?`}
-                                onConfirm={() => confirmDelMedicalRecord(item.id)}
-                                okText="Yes"
-                                cancelText="No">
-                                <DeleteOutlined
-                                    style={{ border: "1px dashed red" }}
-                                    className="btn btn-sm  me-1 pt-1 pb-1 ps-2 pe-2" />
-                            </Popconfirm>
                         </Tooltip>
                     </div>
                 </Collapse>
@@ -178,84 +167,6 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                 </div>
             ),
         }];
-
-
-    const defaultProValues = {
-        id: patient.id ?? '',
-        name: patient.name ?? '',
-        gender: patient.gender ?? '',
-        dob: patient.dob ?? '',
-        email: patient.email ?? '',
-        phone: patient.phone ?? '',
-        cnic: patient.cnic ?? '',
-        departments: patient.departments ?? '',
-        blood_group: patient.blood_group ?? '',
-        symptoms: patient.symptoms ?? '',
-        visit_purpose: patient.visit_purpose ?? '',
-        patient_father_name: patient.patient_father_name ?? '',
-        patient_mother_name: patient.patient_mother_name ?? '',
-        patient_address: patient.patient_address ?? '',
-        insurance_name: patient.insurance_name ?? '',
-        insurance_number: patient.insurance_number ?? '',
-        insurance_holder: patient.insurance_holder ?? '',
-        insurance_type: patient.insurance_type ?? ''
-    }
-    // State for profile form values
-    const [profileForm, setProfileForm] = useState(defaultProValues);
-
-    // Modal open/close state
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-
-    // Open profile modal
-    const openProfileModal = () => {
-        setIsProfileModalOpen(true);
-    };
-
-    // Close profile modal
-    const closeProfileModal = () => {
-        setIsProfileModalOpen(false);
-    };
-
-    // Handle field value change
-    const handleProfileInputChange = (field, value) => {
-        setProfileForm(prev => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
-
-    // Submit handler
-
-    const handleProfileSubmit = () => {
-        setLoading(true);
-        router.put(`/patient/update/${profileForm.id}`, profileForm, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setProfileForm(defaultProValues);
-                setIsProfileModalOpen(false);
-            },
-            onError: () => {
-                setLoading(false);
-            },
-            onFinish: () => {
-                setLoading(false);
-            }
-        });
-    }
-
-    // Popconfirm Patients Delete
-    const confirmDelMedicalRecord = (id) =>
-        new Promise((resolve) => {
-            router.delete(`/medical-record/destroy/${id}`, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    resolve();
-                },
-                onError: () => {
-                    message.error("Failed to delete department");
-                },
-            });
-        });
 
     const { flash, errors } = usePage().props;
     const [api, contextHolder] = notification.useNotification();
@@ -298,12 +209,12 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                             />
                         </div>
                         <div>
-                            {/* <button
+                            <button
                                 className="btn btn-outline-primary btn-sm"
                                 style={{ borderStyle: "dashed" }}>
                                 <PlusCircleOutlined className="me-1" />
                                 Token
-                            </button> */}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -354,10 +265,7 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                                 <p className="text-center mb-1"><b>Phone: </b>{patient.phone}</p>
                                                 <div className="d-flex justify-content-center mt-3">
                                                     <button
-                                                        className="btn btn-sm btn-primary"
-                                                        onClick={openProfileModal}>
-                                                        Update Profile
-                                                    </button>
+                                                        className="btn btn-sm btn-primary">Add Reminder</button>
                                                 </div>
                                             </>
                                         }
@@ -603,261 +511,6 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
 
                                 </Collapse>
 
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </Modal>
-            <Modal
-                title={
-                    <div className="d-flex justify-content-between">
-                        <span>Update Profile</span>
-                        <span>
-                            <CloseOutlined onClick={closeProfileModal} />
-                        </span>
-                    </div>
-                }
-                open={isProfileModalOpen}
-                onCancel={closeProfileModal}
-                onOk={handleProfileSubmit}
-                okText="Update Profile"
-                maskClosable={false} closeIcon={false}
-                styles={{
-                    body: {
-                        padding: "20px 0px"
-                    },
-                    content: {
-                        borderRadius: 0, maxHeight: "80vh",
-                        overflowY: "auto", padding: "0 20px"
-                    }
-                }}
-                centered confirmLoading={loading}
-                okButtonProps={{ loading }} cancelButtonProps={{ disabled: loading }}>
-                <div className="container-fluid">
-                    <div className="row">
-                        <div className="col-12">
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Name:</label>
-                                <Input className="w-100" placeholder="Name" allowClear
-                                    value={profileForm.name}
-                                    onChange={(e) => handleProfileInputChange("name", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Gender:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Gender"
-                                    allowClear
-                                    value={profileForm.gender || null}
-                                    onChange={(gender) => handleProfileInputChange("gender", gender ?? null)}
-                                    options={[
-                                        { value: 'Male', label: 'Male' },
-                                        { value: 'Female', label: 'Female' },
-                                        { value: 'Other', label: 'Other' },
-                                    ]}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="">Date Of Birth:</label>
-                                <DatePicker
-                                    className="w-100"
-                                    placeholder="Date Of Birth"
-                                    allowClear
-                                    value={profileForm.dob ? dayjs(profileForm.dob) : null}
-                                    onChange={(date, dateString) => handleProfileInputChange("dob", dateString)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Email:</label>
-                                <Input className="w-100" placeholder="Email" type="email" allowClear
-                                    value={profileForm.email}
-                                    onChange={(e) => handleProfileInputChange("email", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Phone:</label>
-                                <PhoneInput
-                                    style={{ zIndex: "1000" }}
-                                    defaultCountry="usa"
-                                    value={profileForm.phone}
-                                    onChange={(value) => handleProfileInputChange("phone", value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Cnic:</label>
-                                <Input className="w-100" placeholder="CNIC" allowClear
-                                    value={profileForm.cnic}
-                                    onChange={(e) => handleProfileInputChange("cnic", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Department:</label>
-                                <Select
-                                    style={{ width: "100%" }}
-                                    className="mb-2"
-                                    value={profileForm.departments || null}
-                                    onChange={(data) => handleProfileInputChange("departments", data)}
-                                    placeholder="Select Department"
-                                    allowClear
-                                    showSearch
-                                    options={departments.map((dept) => ({
-                                        value: dept.name,
-                                        label: dept.name,
-                                    }))}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Blood Group:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Blood Group"
-                                    allowClear
-                                    showSearch
-                                    value={profileForm.blood_group || null}
-                                    onChange={(data) => handleProfileInputChange("blood_group", data ?? null)}
-                                    options={[
-                                        { value: 'A+', label: 'A+' },
-                                        { value: 'A-', label: 'A-' },
-                                        { value: 'B+', label: 'B+' },
-                                        { value: 'B-', label: 'B-' },
-                                        { value: 'AB+', label: 'AB+' },
-                                        { value: 'AB-', label: 'AB-' },
-                                        { value: 'O+', label: 'O+' },
-                                        { value: 'O-', label: 'O-' },
-                                    ]}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="">Symptoms:</label>
-                                <TextArea
-                                    rows={2}
-                                    placeholder="Fever,Cough,Nausea,Dizziness,Vomiting"
-                                    allowClear
-                                    value={profileForm.symptoms}
-                                    onChange={(e) => handleProfileInputChange("symptoms", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Purpose Of Visit:</label>
-                                <Input className="w-100" placeholder="General Checkup, Consultation" allowClear
-                                    value={profileForm.visit_purpose}
-                                    onChange={(e) => handleProfileInputChange("visit_purpose", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Father:</label>
-                                <Input className="w-100" placeholder="Patient Father Name" allowClear
-                                    value={profileForm.patient_father_name}
-                                    onChange={(e) => handleProfileInputChange("patient_father_name", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Mother:</label>
-                                <Input className="w-100" placeholder="Patient Mother Name" allowClear
-                                    value={profileForm.patient_mother_name}
-                                    onChange={(e) => handleProfileInputChange("patient_mother_name", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Patient Address:</label>
-                                <TextArea
-                                    rows={2}
-                                    placeholder="456 Elm Street, Suite 3, Los Angeles, CA 90001, USA"
-                                    allowClear
-                                    value={profileForm.patient_address}
-                                    onChange={(e) => handleProfileInputChange("patient_address", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="d-flex align-items-center mb-2">
-                                <label className="me-1">Insurance:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Insurance"
-                                    allowClear
-                                    showSearch
-                                    value={profileForm.insurance_name || null}
-                                    onChange={(data) => handleProfileInputChange("insurance_name", data ?? null)}
-                                    options={[
-                                        { value: 'Medical aid', label: 'Medical aid' },
-                                        { value: 'SNGPL', label: 'SNGPL' },
-                                        { value: 'UBL Insurer', label: 'UBL Insurer' },
-                                        { value: 'Health Connects', label: 'Health Connects' },
-                                        { value: 'BYCO', label: 'BYCO' },
-                                        { value: 'PIA', label: 'PIA' },
-                                        { value: 'CDC', label: 'CDC' },
-                                        { value: 'UMT Stuent', label: 'UMT Stuent' },
-                                        { value: 'SEHAT INSAF CARD', label: 'SEHAT INSAF CARD' },
-                                        { value: 'jubliee', label: 'jubliee' },
-                                        { value: 'Sehat Sahulat Card', label: 'Sehat Sahulat Card' },
-                                        { value: 'Sehat Card', label: 'Sehat Card' },
-                                        { value: 'EFU', label: 'EFU' },
-                                        { value: 'Fundings', label: 'Fundings' },
-                                        { value: 'Social Security', label: 'Social Security' },
-                                    ]}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Insurance Number:</label>
-                                <Input className="w-100" placeholder="Insurance Number" allowClear
-                                    value={profileForm.insurance_number}
-                                    onChange={(e) => handleProfileInputChange("insurance_number", e.target.value)}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Insurance Holder:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Insurance Holder"
-                                    allowClear
-                                    showSearch
-                                    value={profileForm.insurance_holder || null}
-                                    onChange={(data) => handleProfileInputChange("insurance_holder", data ?? null)}
-                                    options={[
-                                        { value: 'personal', label: 'Personal' },
-                                        { value: 'family', label: 'Family' },
-                                        { value: 'employer', label: 'Employer' },
-                                        { value: 'government', label: 'Government' },
-                                        { value: 'military', label: 'Military' },
-                                        { value: 'corporate', label: 'Corporate' },
-                                    ]}
-                                    disabled={loading}
-                                />
-                            </div>
-                            <div className="mb-2">
-                                <label className="me-1">Insurance Type:</label>
-                                <Select
-                                    className="w-100"
-                                    placeholder="Select Insurance Type"
-                                    allowClear
-                                    showSearch
-                                    value={profileForm.insurance_type || null}
-                                    onChange={(data) => handleProfileInputChange("insurance_type", data ?? null)}
-                                    options={[
-                                        { value: 'personal', label: 'Personal' },
-                                        { value: 'family', label: 'Family' },
-                                        { value: 'employer', label: 'Employer' },
-                                        { value: 'government', label: 'Government' },
-                                        { value: 'military', label: 'Military' },
-                                        { value: 'corporate', label: 'Corporate' },
-                                    ]}
-                                    disabled={loading}
-                                />
                             </div>
                         </div>
                     </div>

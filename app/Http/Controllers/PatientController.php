@@ -65,14 +65,29 @@ class PatientController extends Controller
     {
         $patient = Patient::findOrFail($id);
         $profile = Storage::url($patient->profile);
-        $medicalRecords = MedicalRecord::where('patient_id', $id)->cursor();
-        $templates = Template::where('user_id', 2)->cursor();
+        $medicalRecords = MedicalRecord::where('patient_id', $id)
+        ->orderByDesc('created_at')
+        ->orderByDesc('id')
+        ->cursor();
+        $doctors = User::where('type', "doctor")->cursor();
+        $templates = Template::cursor();
+        $departments = Department::cursor();
         return Inertia::render('Components/Patient/Show', [
             'patient' => $patient,
             'profile' => $profile,
             'medicalRecords' => $medicalRecords,
+            'doctors' => $doctors,
             'templates' => $templates,
+            'departments' => $departments,
         ]);
+    }
+
+    public function Update(Request $request, $id)
+    {
+        $profile = Patient::findOrFail($id);
+        $updateData = $request->all();
+        $profile->update($updateData);
+        return redirect()->back()->with('message', 'Profile Updated Successfully!');
     }
 
     // Delete Patient Record

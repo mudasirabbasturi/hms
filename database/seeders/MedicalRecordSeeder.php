@@ -12,7 +12,7 @@ class MedicalRecordSeeder extends Seeder
      */
     public function run(): void
     {
-        // Realistic medical record templates
+        // Sample medical record templates
         $records = [
             [
                 'complaint'    => 'Persistent headache and dizziness.',
@@ -44,20 +44,24 @@ class MedicalRecordSeeder extends Seeder
             ]
         ];
 
-        // Get all patient and user IDs
+        // Only doctors
+        $doctorIds = DB::table('users')
+            ->where('type', 'doctor')
+            ->pluck('id');
+
+        // All patients
         $patientIds = DB::table('patients')->pluck('id');
-        $userIds = DB::table('users')->pluck('id');
 
         foreach ($patientIds as $patientId) {
-            // Pick a random user ID from the list
-            $randomUserId = $userIds->random();
+            // Assign a random doctor for this patient
+            $doctorId = $doctorIds->random();
 
-            // Pick 1 or 2 random records to insert for this patient
-            $shuffledRecords = collect($records)->shuffle()->take(rand(1, 2));
+            // Take 1 or 2 records randomly
+            $selectedRecords = collect($records)->shuffle()->take(rand(1, 2));
 
-            foreach ($shuffledRecords as $record) {
+            foreach ($selectedRecords as $record) {
                 DB::table('medical_records')->insert([
-                    'user_id'         => $randomUserId,
+                    'user_id'         => $doctorId,
                     'patient_id'      => $patientId,
                     'complaint'       => $record['complaint'],
                     'examination'     => $record['examination'],
