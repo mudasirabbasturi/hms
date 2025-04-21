@@ -70,6 +70,7 @@ class PatientController extends Controller
         ->orderByDesc('id')
         ->cursor();
         $doctors = User::where('type', "doctor")->cursor();
+        $tokens = Appointment::where('patient_id', $id)->cursor();
         $templates = Template::cursor();
         $departments = Department::cursor();
         return Inertia::render('Components/Patient/Show', [
@@ -79,6 +80,7 @@ class PatientController extends Controller
             'doctors' => $doctors,
             'templates' => $templates,
             'departments' => $departments,
+            'tokens' => $tokens,
         ]);
     }
 

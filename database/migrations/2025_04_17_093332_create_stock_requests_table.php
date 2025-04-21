@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('stock_requests', function (Blueprint $table) {
             $table->id();
             $table->string('requested_by');
-            $table->string('department')->nullable();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->foreignId('item_id')->constrained();
             $table->integer('requested_qty');
             $table->enum('status', ['pending', 'approved', 'rejected', 'returned'])->default('pending');

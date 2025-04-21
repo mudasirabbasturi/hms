@@ -18,7 +18,7 @@ const { Meta } = Card;
 const { Panel } = Collapse;
 const { TextArea } = Input;
 
-const Show = ({ patient, profile, medicalRecords, doctors, templates, departments }) => {
+const Show = ({ patient, profile, medicalRecords, doctors, templates, departments, tokens }) => {
     const [imageError, setImageError] = useState(false);
     const [loading, setLoading] = useState(false);
     const defaultValues = {
@@ -160,7 +160,10 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
             children: (
                 <div className="text-center pt-4 pb-4">
                     <p>No medical records found for this patient.</p>
-                    <Tooltip title="Add First Medical Record" color="volcano" placement="top">
+                    <Tooltip
+                        title="Add First Medical Record"
+                        color="volcano"
+                        placement="top">
                         <button
                             style={{ border: "1px dashed #FA541C" }}
                             className="btn btn-sm pt-1 pb-1 ps-3 pe-3"
@@ -257,6 +260,50 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
             });
         });
 
+    // Token Crud
+    const defaultTokenValue = {
+        id: null, user_id: '', patient_id: '', status: 'Scheduled',
+        appointment_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+        appointment_type: 'token', comment: ''
+    }
+    const [tokenValue, setTokenValue] = useState(defaultTokenValue)
+    const [isTokenModalShow, setIsTokenModalShow] = useState(null)
+    const openTokenModal = (userId) => {
+        setTokenValue((prev) => ({
+            ...prev,
+            user_id: userId
+        }))
+        setIsTokenModalShow(true)
+    }
+    const cancelTokenModal = () => {
+        setIsTokenModalShow(false)
+    }
+
+    const onChangeToken = (key, value) => {
+        setTokenValue(prev => ({
+            ...prev,
+            [key]: value,
+        }));
+    }
+    const handelSubmitToken = () => {
+        setLoading(true);
+        const method = mode === 'update' ? 'put' : 'post';
+        const url =
+            mode === 'update'
+                ? `/opd/token/update/${values.token_id}`
+                : `/opd/token/store`;
+
+        router[method](url, values, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setTokenValue(defaultTokenValue);
+                onCancel();
+            },
+            onError: () => setLoading(false),
+            onFinish: () => setLoading(false),
+        });
+    }
+
     const { flash, errors } = usePage().props;
     const [api, contextHolder] = notification.useNotification();
     /** Flash Success Message */
@@ -298,12 +345,13 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                             />
                         </div>
                         <div>
-                            {/* <button
+                            <button
                                 className="btn btn-outline-primary btn-sm"
-                                style={{ borderStyle: "dashed" }}>
+                                style={{ borderStyle: "dashed" }}
+                                onClick={() => openTokenModal(patient.id)}>
                                 <PlusCircleOutlined className="me-1" />
                                 Token
-                            </button> */}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -372,7 +420,7 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                     <div className="col-md-9">
                         <div className="container-fluid">
                             <div className="row">
-                                <div className="col-md-9">
+                                <div className="col-md-8">
                                     <div className="row">
                                         <div className="col-12 mb-3">
                                             <Card
@@ -407,7 +455,54 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-md-3">
+                                <div className="col-md-4">
+                                    <Card
+                                        styles={{
+                                            header: {
+                                                backgroundColor: "#eee",
+                                                minHeight: "44px",
+                                            },
+                                        }}
+                                        title={
+                                            <div className="d-flex justify-content-between">
+                                                <div>OPD</div>
+                                            </div>
+                                        }>
+                                        <div>
+                                            {tokens && tokens.length > 0 ? (
+                                                tokens.map((token) => (
+                                                    <div key={token.id}
+                                                        className="mb-2">
+                                                        <div>
+                                                            <span className="me-2">Token No:</span>
+                                                            <strong>{token.token_number}</strong>
+                                                        </div>
+
+                                                        <button
+                                                            className="btn btn-sm btn-primary"
+                                                            onClick={() => openTokenModal(token.user_id, token)}
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <div>
+                                                    <div>
+                                                        No OPD tokens yet. Please Add
+                                                    </div>
+                                                    <button
+                                                        className="btn btn-outline-primary btn-sm"
+                                                        style={{ borderStyle: "dashed" }}
+                                                        onClick={() => openTokenModal(patient.id)}>
+                                                        <PlusCircleOutlined className="me-1" />
+                                                        Token
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Card>
+
                                 </div>
                             </div>
                         </div>
@@ -860,6 +955,105 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                 />
                             </div>
                         </div>
+                    </div>
+                </div>
+            </Modal>
+            <Modal
+                title={
+                    <div className="d-flex justify-content-between">
+                        <span>{mode === 'update' ? 'Update Token' : 'Add Token'}</span>
+                        <span>
+                            <CloseOutlined onClick={cancelTokenModal} />
+                        </span>
+                    </div>
+                }
+                open={isTokenModalShow}
+                onCancel={cancelTokenModal}
+                onOk={handelSubmitToken}
+                okText={mode === 'update' ? 'Update Token' : 'Add Token'}
+                maskClosable={false} closeIcon={false}
+                styles={{
+                    body: {
+                        padding: "20px 0px"
+                    },
+                    content: {
+                        borderRadius: 0, maxHeight: "80vh",
+                        overflowY: "auto", padding: "0 20px"
+                    }
+                }}
+                centered confirmLoading={loading}
+                okButtonProps={{ loading }} cancelButtonProps={{ disabled: loading }}>
+                <div className="row">
+                    <div className="d-flex align-items-center mb-3">
+                        <label className="me-1">Doctor:</label>
+                        <Select
+                            className="w-100"
+                            placeholder="Select Doctors"
+                            allowClear showSearch
+                            value={tokenValue.user_id || null}
+                            onChange={(data) => onChangeToken("user_id", data)}
+                            options={doctors.map((doc) => ({
+                                value: doc.id,
+                                label: doc.name,
+                            }))}
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="d-flex align-items-center mb-3">
+                        <label className="me-1">Patient:</label>
+                        <Select
+                            className="w-100"
+                            placeholder="Select Patient"
+                            allowClear showSearch
+                            optionFilterProp="label"
+                            value={tokenValue.patient_id || null}
+                            onChange={(data) => onChangeToken("patient_id", data)}
+                            // options={patients.map((pat) => ({
+                            //     value: pat.id,
+                            //     label: pat.name,
+                            // }))}
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="me-1">Staus (default: Scheduled):</label>
+                        <Select
+                            className="w-100"
+                            placeholder="Select Status"
+                            allowClear
+                            value={tokenValue.status || null}
+                            onChange={(data) => onChangeToken("status", data)}
+                            options={[
+                                { value: 'Scheduled', label: 'Scheduled' },
+                                { value: 'Confirmed', label: 'Confirmed' },
+                                { value: 'Checked In', label: 'Checked In' },
+                                { value: 'Checked Out', label: 'Checked Out' },
+                                { value: 'No Show', label: 'No Show' },
+                            ]}
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="">Comment:</label>
+                        <TextArea
+                            autoSize={{ minRows: 2 }}
+                            placeholder="Fever,Cough,Nausea,Dizziness,Vomiting"
+                            allowClear
+                            value={tokenValue.comment}
+                            onChange={(e) => onChangeToken("comment", e.target.value)}
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label className="">Appointment Date (Default: Current):</label>
+                        <DatePicker
+                            className="w-100"
+                            placeholder="Appointment Date"
+                            allowClear showTime
+                            value={tokenValue.appointment_date ? dayjs(tokenValue.appointment_date) : null}
+                            onChange={(date, dateString) => onChangeToken("appointment_date", dateString)}
+                            disabled={loading}
+                        />
                     </div>
                 </div>
             </Modal>

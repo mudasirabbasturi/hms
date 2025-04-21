@@ -13,9 +13,17 @@ return new class extends Migration
     {
         Schema::create('stock_consumptions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_stock_id')->constrained('item_stocks')->cascadeOnDelete();
+            // Relations
+            $table->foreignId('item_stock_id')->constrained('item_stocks')->cascadeOnDelete(); 
+            $table->foreignId('item_id')->constrained('items')->cascadeOnDelete();
             $table->integer('consumed_qty');
-            $table->string('used_by')->nullable();
+            $table->string('consumption_type');
+            $table->string('template_name')->nullable();
+            $table->string('added_by')->nullable();
+            $table->text('comment')->nullable();
+            // Costs
+            $table->decimal('total_cost', 10, 2)->default(0);
+            $table->decimal('total_retail_price', 10, 2)->default(0);
             $table->timestamps();
         });
     }
