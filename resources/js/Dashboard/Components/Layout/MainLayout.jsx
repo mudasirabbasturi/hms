@@ -59,7 +59,7 @@ const MainLayout = ({ children }) => {
                                     },
                                 ]}
                             />
-                            {/* <div className="me-4">
+                            <div className="me-4">
                                 <Breadcrumb
                                     separator="|"
                                     items={[
@@ -79,7 +79,7 @@ const MainLayout = ({ children }) => {
                                         { title: <Link href="/">Setting</Link> }
                                     ]}
                                 />
-                            </div> */}
+                            </div>
                         </div>
                     </div>
                 </Header>
