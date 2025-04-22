@@ -54,6 +54,7 @@ class AppointmentController extends Controller
             'patient_id' => 'required|exists:patients,id',
             'status' => 'nullable|in:Scheduled,Confirmed,Checked In,Checked Out,No Show',
             'appointment_date' => 'nullable|date',
+            'comment' => 'nullable|string|max:1000',
             'start_time' => 'nullable|required_if:appointment_type,consultation|date_format:H:i:s',
             'end_time' => 'nullable|required_if:appointment_type,consultation|date_format:H:i:s|after:start_time',
             'appointment_type' => 'required|in:token,consultation',

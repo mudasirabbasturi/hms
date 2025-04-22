@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained( table: 'users', indexName: 'appointments_user_id');
-            $table->foreignId('patient_id')->constrained( table: 'patients', indexName: 'appointments_patient_id');
+            $table->foreignId('user_id')->constrained( table: 'users', indexName: 'appointments_user_id')->onDelete('set null');
+            $table->foreignId('patient_id')->constrained( table: 'patients', indexName: 'appointments_patient_id')->onDelete('cascade');
             $table->enum('status', ['Scheduled', 'Confirmed', 'Checked In', 'Checked Out', 'No Show'])->default('Scheduled');
             $table->string('token_number')->nullable();
             $table->date('appointment_date')->nullable();

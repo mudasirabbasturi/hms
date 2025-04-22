@@ -262,21 +262,18 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
 
     // Token Crud
     const defaultTokenValue = {
-        id: null, user_id: '', patient_id: '', status: 'Scheduled',
+        id: null, user_id: '', patient_id: patient.id, status: 'Scheduled',
         appointment_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         appointment_type: 'token', comment: ''
     }
     const [tokenValue, setTokenValue] = useState(defaultTokenValue)
     const [isTokenModalShow, setIsTokenModalShow] = useState(null)
-    const openTokenModal = (userId) => {
-        setTokenValue((prev) => ({
-            ...prev,
-            user_id: userId
-        }))
+    const openTokenModal = () => {
         setIsTokenModalShow(true)
     }
     const cancelTokenModal = () => {
         setIsTokenModalShow(false)
+        setTokenValue(defaultTokenValue);
     }
 
     const onChangeToken = (key, value) => {
@@ -290,19 +287,33 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
         const method = mode === 'update' ? 'put' : 'post';
         const url =
             mode === 'update'
-                ? `/opd/token/update/${values.token_id}`
+                ? `/opd/token/update/${tokenValue.id}`
                 : `/opd/token/store`;
 
-        router[method](url, values, {
+        router[method](url, tokenValue, {
             preserveScroll: true,
             onSuccess: () => {
                 setTokenValue(defaultTokenValue);
-                onCancel();
+                setIsTokenModalShow(false)
             },
             onError: () => setLoading(false),
             onFinish: () => setLoading(false),
         });
     }
+
+    // Popconfirm Patients Delete
+    const confirmDelToken = (id) =>
+        new Promise((resolve) => {
+            router.delete(`/opd/token_consultation/destroy/${id}`, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    resolve();
+                },
+                onError: () => {
+                    message.error("Failed to delete department");
+                },
+            });
+        });
 
     const { flash, errors } = usePage().props;
     const [api, contextHolder] = notification.useNotification();
@@ -348,7 +359,11 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                             <button
                                 className="btn btn-outline-primary btn-sm"
                                 style={{ borderStyle: "dashed" }}
-                                onClick={() => openTokenModal(patient.id)}>
+                                onClick={() => {
+                                    setMode("add");
+                                    setTokenValue(defaultTokenValue);
+                                    openTokenModal(patient.id);
+                                }}>
                                 <PlusCircleOutlined className="me-1" />
                                 Token
                             </button>
@@ -420,7 +435,7 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                     <div className="col-md-9">
                         <div className="container-fluid">
                             <div className="row">
-                                <div className="col-md-8">
+                                <div className="col-md-6">
                                     <div className="row">
                                         <div className="col-12 mb-3">
                                             <Card
@@ -455,9 +470,12 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                         </div>
                                     </div>
                                 </div>
-                                <div className="col-md-4">
+                                <div className="col-md-6">
                                     <Card
                                         styles={{
+                                            body: {
+                                                padding: "8px 3px"
+                                            },
                                             header: {
                                                 backgroundColor: "#eee",
                                                 minHeight: "44px",
@@ -465,36 +483,77 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                         }}
                                         title={
                                             <div className="d-flex justify-content-between">
-                                                <div>OPD</div>
+                                                <div>OPD For {patient.name}</div>
                                             </div>
                                         }>
                                         <div>
                                             {tokens && tokens.length > 0 ? (
-                                                tokens.map((token) => (
-                                                    <div key={token.id}
-                                                        className="mb-2">
-                                                        <div>
-                                                            <span className="me-2">Token No:</span>
-                                                            <strong>{token.token_number}</strong>
-                                                        </div>
-
-                                                        <button
-                                                            className="btn btn-sm btn-primary"
-                                                            onClick={() => openTokenModal(token.user_id, token)}
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                    </div>
-                                                ))
+                                                <table className="table table-striped table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Doctor</th>
+                                                            <th>Token#</th>
+                                                            <th>Date</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {tokens.map((token) => (
+                                                            <tr key={token.id}>
+                                                                <td>{token.doctor_name}</td>
+                                                                <td>{token.token_number}</td>
+                                                                <td>
+                                                                    {`${dayjs(token.appointment_date).format('DD MMM YYYY, hh:mm A')}`}
+                                                                </td>
+                                                                <td className="d-flex">
+                                                                    <Tooltip
+                                                                        title={`Update Tokens`}
+                                                                        color="volcano"
+                                                                        placement="leftTop"
+                                                                        className="me-1">
+                                                                        <button
+                                                                            className="btn btn-sm"
+                                                                            onClick={() => {
+                                                                                setMode("update");
+                                                                                setTokenValue({
+                                                                                    id: token.id,
+                                                                                    user_id: token.user_id,
+                                                                                    status: token.status,
+                                                                                    comment: token.comment,
+                                                                                    appointment_date: token.appointment_date,
+                                                                                });
+                                                                                openTokenModal();
+                                                                            }}
+                                                                            style={{ border: "1px dashed rgb(154, 250, 28)" }}>
+                                                                            <EditOutlined />
+                                                                        </button>
+                                                                    </Tooltip>
+                                                                    <Tooltip title={`Delete Token`} color="red" placement="leftTop">
+                                                                        <Popconfirm title={`Are you sure you want to delete Token?`}
+                                                                            onConfirm={() => confirmDelToken(token.id)}
+                                                                            okText="Yes"
+                                                                            cancelText="No">
+                                                                            <DeleteOutlined
+                                                                                style={{ border: "1px dashed red" }}
+                                                                                className="btn btn-sm" />
+                                                                        </Popconfirm>
+                                                                    </Tooltip>
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
                                             ) : (
-                                                <div>
-                                                    <div>
-                                                        No OPD tokens yet. Please Add
-                                                    </div>
+                                                <div className="ms-3">
+                                                    <div>No OPD tokens yet. Please Add</div>
                                                     <button
                                                         className="btn btn-outline-primary btn-sm"
                                                         style={{ borderStyle: "dashed" }}
-                                                        onClick={() => openTokenModal(patient.id)}>
+                                                        onClick={() => {
+                                                            setMode("add");
+                                                            setTokenValue(defaultTokenValue);
+                                                            openTokenModal(patient.id);
+                                                        }}>
                                                         <PlusCircleOutlined className="me-1" />
                                                         Token
                                                     </button>
@@ -984,6 +1043,12 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                 centered confirmLoading={loading}
                 okButtonProps={{ loading }} cancelButtonProps={{ disabled: loading }}>
                 <div className="row">
+                    <div className="d-flex align-items-center mb-1">
+                        <label className="me-1">For Patient:</label>
+                        <label style={{ textTransform: "capitalize" }}>
+                            <b>{patient.name}</b>
+                        </label>
+                    </div><hr className="mt-0 mb-1" />
                     <div className="d-flex align-items-center mb-3">
                         <label className="me-1">Doctor:</label>
                         <Select
@@ -996,22 +1061,6 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                                 value: doc.id,
                                 label: doc.name,
                             }))}
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="d-flex align-items-center mb-3">
-                        <label className="me-1">Patient:</label>
-                        <Select
-                            className="w-100"
-                            placeholder="Select Patient"
-                            allowClear showSearch
-                            optionFilterProp="label"
-                            value={tokenValue.patient_id || null}
-                            onChange={(data) => onChangeToken("patient_id", data)}
-                            // options={patients.map((pat) => ({
-                            //     value: pat.id,
-                            //     label: pat.name,
-                            // }))}
                             disabled={loading}
                         />
                     </div>
@@ -1049,7 +1098,7 @@ const Show = ({ patient, profile, medicalRecords, doctors, templates, department
                         <DatePicker
                             className="w-100"
                             placeholder="Appointment Date"
-                            allowClear showTime
+                            showTime
                             value={tokenValue.appointment_date ? dayjs(tokenValue.appointment_date) : null}
                             onChange={(date, dateString) => onChangeToken("appointment_date", dateString)}
                             disabled={loading}

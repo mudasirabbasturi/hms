@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('requested_by');
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
-            $table->foreignId('item_id')->constrained();
+            $table->foreignId('item_id')->constrained()->nullOnDelete();
             $table->integer('requested_qty');
             $table->enum('status', ['pending', 'approved', 'rejected', 'returned'])->default('pending');
             $table->timestamps();

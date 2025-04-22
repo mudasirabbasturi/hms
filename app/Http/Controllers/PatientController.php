@@ -70,7 +70,11 @@ class PatientController extends Controller
         ->orderByDesc('id')
         ->cursor();
         $doctors = User::where('type', "doctor")->cursor();
-        $tokens = Appointment::where('patient_id', $id)->cursor();
+        // $tokens = Appointment::where('patient_id', $id)->cursor();
+        $tokens = Appointment::where('patient_id', $id)
+            ->leftJoin('users', 'appointments.user_id', '=', 'users.id')
+            ->select('appointments.*', 'users.name as doctor_name')
+            ->get();
         $templates = Template::cursor();
         $departments = Department::cursor();
         return Inertia::render('Components/Patient/Show', [

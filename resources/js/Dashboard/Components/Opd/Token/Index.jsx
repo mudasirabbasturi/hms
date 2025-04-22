@@ -88,6 +88,14 @@ const Index = ({ tokens, doctors, patients, departments }) => {
                             }
                         />
                     </Tooltip>
+                    <Tooltip title={`View Patient`} color="orange" placement="bottomLeft">
+                        <Link
+                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
+                            style={{ border: "1px solid orange" }}
+                            href={`/patient/view/${params.data.patient_id}`}>
+                            <EyeOutlined />
+                        </Link>
+                    </Tooltip>
                     <Tooltip title={`Update Token`} color="volcano" placement="leftTop">
                         <EditOutlined
                             style={{ border: "1px dashed #FA541C" }}
