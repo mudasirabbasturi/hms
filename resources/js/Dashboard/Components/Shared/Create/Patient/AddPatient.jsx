@@ -74,7 +74,6 @@ const AddPatient = ({ open, onCancel, departments }) => {
                         overflowY: "auto", padding: "0 20px"
                     }
                 }}
-                // width={600}
                 centered confirmLoading={loading}
                 okButtonProps={{ loading }} cancelButtonProps={{ disabled: loading }}>
                 <div className="row">

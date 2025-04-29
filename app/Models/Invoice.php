@@ -9,15 +9,13 @@ class Invoice extends Model
     use HasFactory;
     protected $fillable = [
         "invoice_number",
-        "item_id",
         "patient_id",
-        "doctor_id",
-        "appointment_id",
         "invoice_date",
         "subtotal",
         "discount",
         "tax",
         "total",
+        "total_paid",
         "status",
         "payment_method",
         "notes",

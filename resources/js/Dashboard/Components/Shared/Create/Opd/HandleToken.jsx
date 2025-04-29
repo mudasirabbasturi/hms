@@ -120,9 +120,9 @@ const HandleToken = ({ open, onCancel, mode, tokenData, doctors, patients, depar
                         disabled={loading}
                     />
                     <button
-                        className="btn btn-outline-info btn-sm"
+                        className="btn btn-outline-primary btn-sm ms-1"
                         onClick={() => setShowPatientModal(true)}>
-                        <Tooltip title={`Add Patient If Not Found`} color="green" placement="leftTop">
+                        <Tooltip title={`Add Patient If Not Found`} color="blue" placement="top">
                             <PlusCircleOutlined />
                         </Tooltip>
 

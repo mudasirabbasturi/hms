@@ -13,6 +13,13 @@ export {
     DiffOutlined, MinusCircleOutlined
 } from "@ant-design/icons";
 
+export { MdGeneratingTokens } from "react-icons/md";
+export { CiStethoscope } from "react-icons/ci";
+export { GiMedicines } from "react-icons/gi";
+export { FaUserDoctor } from "react-icons/fa6";
+export { FaFileInvoiceDollar } from "react-icons/fa";
+export { FcPrint } from "react-icons/fc";
+
 export { PhoneInput } from 'react-international-phone';
 
 import dayjs from "dayjs";

@@ -4,11 +4,12 @@ import {
     Link, usePage, router,
     /** Ant Design Components */
     notification, Breadcrumb, Select, Tooltip, Popconfirm,
-    Input,
-    /** Ant Design Icons */
+    Input, Popover,
+    /** Ant Design & React Icons */
     PlusCircleOutlined, EditOutlined, EyeOutlined, MedicineBoxOutlined,
     FileDoneOutlined, BgColorsOutlined, DollarOutlined, DeleteOutlined,
-    MoreOutlined, CloseOutlined,
+    MoreOutlined, MdGeneratingTokens, CiStethoscope, GiMedicines, FaUserDoctor,
+    FaFileInvoiceDollar, FcPrint
     /** Day js */
 
 } from "@shared/Ui"
@@ -38,32 +39,6 @@ const Index = ({ tokens, doctors, patients, departments }) => {
 
     const colDefs = useMemo(() => [
         {
-            headerName: "Token#",
-            field: "token_number",
-        },
-        {
-            headerName: "Doctors",
-            field: "doctor_name",
-        },
-        {
-            headerName: "Patients",
-            field: "patient_name",
-        },
-        {
-            headerName: 'Status',
-            field: "status",
-            cellEditor: "agSelectCellEditor",
-            cellEditorParams: {
-                values: [
-                    'Scheduled',
-                    'Confirmed',
-                    'Checked In',
-                    'Checked Out',
-                    'No Show',
-                ],
-            },
-        },
-        {
             field: "action",
             headerName: "Action",
             editable: false,
@@ -72,10 +47,9 @@ const Index = ({ tokens, doctors, patients, departments }) => {
             pinned: 'right',
             cellRenderer: (params) => (
                 <>
-                    <Tooltip title={`Add Another Token`} color="green" placement="leftTop">
-                        <PlusCircleOutlined
-                            style={{ border: "1px dashed rgb(117, 250, 28)" }}
-                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
+                    <Tooltip title={`Add | View Health Records`} color="blue" placement="top">
+                        <button
+                            className="btn btn-sm btn-outline-primary me-1"
                             onClick={() =>
                                 setTokenModalState({
                                     open: true,
@@ -85,21 +59,29 @@ const Index = ({ tokens, doctors, patients, departments }) => {
                                         patient_id: params.data.patient_id,
                                     },
                                 })
-                            }
-                        />
+                            }>
+                            <CiStethoscope />
+                        </button>
                     </Tooltip>
-                    <Tooltip title={`View Patient`} color="orange" placement="bottomLeft">
-                        <Link
-                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                            style={{ border: "1px solid orange" }}
-                            href={`/patient/view/${params.data.patient_id}`}>
-                            <EyeOutlined />
-                        </Link>
+                    <Tooltip title={`Add Another Token`} color="blue" placement="top">
+                        <button
+                            className="btn btn-sm btn-outline-primary me-1"
+                            onClick={() =>
+                                setTokenModalState({
+                                    open: true,
+                                    mode: "add-another",
+                                    data: {
+                                        user_id: params.data.user_id,
+                                        patient_id: params.data.patient_id,
+                                    },
+                                })
+                            }>
+                            <MdGeneratingTokens />
+                        </button>
                     </Tooltip>
-                    <Tooltip title={`Update Token`} color="volcano" placement="leftTop">
-                        <EditOutlined
-                            style={{ border: "1px dashed #FA541C" }}
-                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
+                    <Tooltip title={`Edit Token`} color="orange" placement="top">
+                        <button
+                            className="btn btn-sm btn-outline-warning me-1"
                             onClick={() =>
                                 setTokenModalState({
                                     open: true,
@@ -113,75 +95,89 @@ const Index = ({ tokens, doctors, patients, departments }) => {
                                         comment: params.data.comment,
                                     },
                                 })
-                            }
-                        />
+                            }>
+                            <EditOutlined /> <MdGeneratingTokens />
+                        </button>
                     </Tooltip>
-                    <Tooltip title={`Delete Token`} color="red" placement="leftTop">
+                    <Tooltip title={`Print Token`} color="default" placement="top">
+                        <button
+                            className="btn btn-sm btn-outline-secondary me-1"
+                            onClick={() =>
+                                setTokenModalState({
+                                    open: true,
+                                    mode: "update",
+                                    data: {
+                                        token_id: params.data.id,
+                                        user_id: params.data.user_id,
+                                        patient_id: params.data.patient_id,
+                                        status: params.data.status,
+                                        appointment_date: params.data.appointment_date,
+                                        comment: params.data.comment,
+                                    },
+                                })
+                            }>
+                            <FcPrint />
+                        </button>
+                    </Tooltip>
+                    <Tooltip title={`Add / Edit Invoice`} color="blue" placement="top">
+                        <button
+                            className="btn btn-sm btn-outline-primary me-1"
+                            onClick={() =>
+                                setTokenModalState({
+                                    open: true,
+                                    mode: "update",
+                                    data: {
+                                        token_id: params.data.id,
+                                        user_id: params.data.user_id,
+                                        patient_id: params.data.patient_id,
+                                        status: params.data.status,
+                                        appointment_date: params.data.appointment_date,
+                                        comment: params.data.comment,
+                                    },
+                                })
+                            }>
+                            <FaFileInvoiceDollar />
+                        </button>
+                    </Tooltip>
+                    <Tooltip title={`View Patient`} color="#258F7D" placement="top">
+                        <Link
+                            className="btn btn-sm btn-outline-info me-1"
+                            href={`/patient/view/${params.data.patient_id}`}>
+                            <EyeOutlined />
+                        </Link>
+                    </Tooltip>
+                    <Tooltip title={`Delete Token`} color="red" placement="top">
                         <Popconfirm title={`Are you sure you want to delete Token`}
+                            className="btn btn-sm btn-outline-danger me-1"
                             onConfirm={() => confirmDelToken(params.data.id)}
                             okText="Yes"
                             cancelText="No">
-                            <DeleteOutlined
-                                style={{ border: "1px dashed red" }}
-                                className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2" />
+                            <DeleteOutlined />
                         </Popconfirm>
                     </Tooltip>
-                    {/* <Tooltip title={`Click To More Action`} color="red" placement="leftTop">
-                        <Popover
-                            content={
-                                <>
-                                    <Tooltip title={`View Patient`} color="orange" placement="bottomLeft">
-                                        <Link
-                                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                                            style={{ border: "1px solid orange" }}
-                                            href={`/patient/view/${params.data.patient_id}`}>
-                                            <EyeOutlined />
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title={`View Medical History`} color="blue" placement="bottomLeft">
-                                        <Link
-                                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                                            style={{ border: "1px solid rgb(5, 82, 182)" }}
-                                            href={`/patient/view/${params.data.patient_id}`}>
-                                            <MedicineBoxOutlined />
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title={`View Prescription`} color="indigo" placement="bottomLeft">
-                                        <Link
-                                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                                            style={{ border: "1px solid indigo" }}
-                                            href={`/patient/view/${params.data.patient_id}`}>
-                                            <FileDoneOutlined />
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title={`View Mediation`} color="pink" placement="bottomLeft">
-                                        <Link
-                                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                                            style={{ border: "1px solid pink" }}
-                                            href={`/patient/view/${params.data.patient_id}`}>
-                                            <BgColorsOutlined />
-                                        </Link>
-                                    </Tooltip>
-                                    <Tooltip title={`View Invoices`} color="#13c2c2" placement="bottomLeft">
-                                        <Link
-                                            className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2"
-                                            style={{ border: "1px solid #13c2c2" }}
-                                            href={`/patient/view/${params.data.patient_id}`}>
-                                            <DollarOutlined />
-                                        </Link>
-                                    </Tooltip>
-                                </>
-                            }
-                            title="More Actions"
-                            trigger="click"
-                            placement="topLeft">
-                            <MoreOutlined
-                                style={{ border: "1px dashed red" }}
-                                className="btn btn-sm me-1 pt-1 pb-1 ps-2 pe-2" />
-                        </Popover>
-                    </Tooltip> */}
                 </>
             ),
+        },
+        {
+            headerName: "Token#",
+            field: "token_number",
+        },
+        {
+            headerName: "Doctors",
+            field: "doctor_name",
+        },
+        {
+            headerName: "Patients",
+            field: "patient_name",
+        },
+        {
+            headerName: "Comment",
+            field: "comment",
+        },
+        {
+            headerName: 'Status',
+            field: "status",
+            editable: false,
         },
     ], []);
 
